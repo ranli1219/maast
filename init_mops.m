@@ -18,6 +18,8 @@ function init_mops()
 % Created 2001Mar28 by Todd Walter
 % Modified 2001Apr3 by Wyant Chan:  
 %   - added MOPS_SIG_UDRE MOPS_UDREI_MIN
+% Modified 2013Mar14 by Todd Walter added min and max PRN values for GPS,
+%               GLONASS, Galileo, Beidou, and GEOs
 
 global MOPS_NOT_IN_MASK MOPS_NOT_MONITORED;
 global MOPS_UDRE MOPS_SIG_UDRE MOPS_SIG2_UDRE ...
@@ -28,7 +30,10 @@ global MOPS_KV_PA MOPS_KH_PA MOPS_KH_NPA;
 global MOPS_C_COVARIANCE;
 global MOPS_WRSMASK MOPS_USRMASK MOPS_SIN_WRSMASK MOPS_SIN_USRMASK 
 global MOPS_VAL MOPS_HAL MOPS_NPA_HAL
-global MOPS_MAX_GPSPRN MOPS_MIN_GEOPRN
+global MOPS_MIN_GPSPRN MOPS_MAX_GPSPRN MOPS_MIN_GLOPRN MOPS_MAX_GLOPRN 
+global MOPS_MIN_GALPRN MOPS_MAX_GALPRN MOPS_MIN_GEOPRN MOPS_MAX_GEOPRN
+global MOPS_MIN_BDUPRN MOPS_MAX_BDUPRN
+global MOPS_UIRE_NUM MOPS_UIRE_DEN MOPS_UIRE_CONST
 
 MOPS_NOT_IN_MASK   = -12;         % flag to indicate not in current mask
 MOPS_NOT_MONITORED = -16;         % flag to indicate sat or igp is not observed
@@ -64,7 +69,9 @@ MOPS_GIVE          = [0.3 0.6 0.9 1.2 1.5 1.8 2.1 2.4 2.7 3.0 3.6 4.5 6.0 15.0 4
 %MOPS_GIVEI_MAX     = length(MOPS_GIVE)+1;
 
 
-
+MOPS_UIRE_NUM = 40.0*((pi/180)^2);    % Numerator of fraction to provide upper bound on residual iono error (rad^2 * meters) 
+MOPS_UIRE_DEN = 261.0*((pi/180)^2);   % Denominator of higher order terms bound (rad^2) added to elevation angle
+MOPS_UIRE_CONST = 0.018; % Constant term added to fraction (meters)
 
 
 MOPS_KV_PA         = 5.33;        % K value for VPL calc
@@ -84,5 +91,13 @@ MOPS_VAL            = 50;
 MOPS_HAL            = 40;
 MOPS_NPA_HAL        = 556;
 
-MOPS_MAX_GPSPRN     = 74;  %expanded to include galileo
+MOPS_MIN_GPSPRN     = 1; 
+MOPS_MAX_GPSPRN     = 37; 
+MOPS_MIN_GLOPRN     = 38; 
+MOPS_MAX_GLOPRN     = 74;
+MOPS_MIN_GALPRN     = 75; 
+MOPS_MAX_GALPRN     = 111;
 MOPS_MIN_GEOPRN     = 120;
+MOPS_MAX_GEOPRN     = 158;
+MOPS_MIN_BDUPRN     = 174; 
+MOPS_MAX_BDUPRN     = 210;

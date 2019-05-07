@@ -2,9 +2,9 @@ function svmrun(gpsudrefun, geoudrefun, givefun, usrcnmpfun,...
                 wrsgpscnmpfun, wrsgeocnmpfun,...
                 wrsfile, usrfile, igpfile, svfile, geodata, tstart, tend, ...
 				tstep, usrlatstep, usrlonstep, outputs, percent, vhal, ...
-                pa_mode, dual_freq);
+                pa_mode, dual_freq)
 %*************************************************************************
-%*     Copyright c 2007 The board of trustees of the Leland Stanford     *
+%*     Copyright c 2013 The board of trustees of the Leland Stanford     *
 %*                      Junior University. All rights reserved.          *
 %*     This script file may be distributed and used freely, provided     *
 %*     this copyright notice is always kept with it.                     *
@@ -50,21 +50,20 @@ function svmrun(gpsudrefun, geoudrefun, givefun, usrcnmpfun,...
 %                     frequency user
 
 %Modified Todd Walter June 28, 2007 to include VAL, HAL and PA vs. NPA mode
+% Clean up 2013 Aug 30 by Todd Walter
 
-global CONST_H_IONO;
-global COL_SAT_UDREI COL_SAT_PRN COL_SAT_XYZ COL_SAT_MINMON ...
-        COL_USR_UID COL_IGP_LL COL_IGP_DELAY...
-        COL_U2S_UID COL_U2S_PRN COL_U2S_MAX COL_U2S_TTRACK0 COL_U2S_GENUB...
-        COL_U2S_IPPLL COL_IGP_GIVEI COL_IGP_MINMON COL_IGP_BETA...
+global COL_SAT_UDREI COL_SAT_XYZ COL_SAT_MINMON ...
+        COL_U2S_UID  COL_U2S_GENUB...
+        COL_IGP_GIVEI COL_IGP_MINMON COL_IGP_BETA...
         COL_IGP_CHI2RATIO
-global  COL_USR_XYZ COL_USR_LL COL_USR_LLH COL_USR_EHAT ...
-        COL_USR_NHAT COL_USR_UHAT COL_USR_INBND COL_USR_MAX
+global  COL_USR_XYZ COL_USR_EHAT ...
+        COL_USR_NHAT COL_USR_UHAT COL_USR_INBND 
 global HIST_UDRE_NBINS HIST_GIVE_NBINS HIST_UDRE_EDGES HIST_GIVE_EDGES
 global HIST_UDREI_NBINS HIST_GIVEI_NBINS HIST_UDREI_EDGES HIST_GIVEI_EDGES
 global MOPS_SIN_USRMASK MOPS_SIN_WRSMASK MOPS_NOT_MONITORED
-global MOPS_UDREI_NM MOPS_GIVEI_NM MOPS_UDREI_MAX MOPS_GIVEI_MAX
+global MOPS_UDREI_NM MOPS_GIVEI_NM
 global CNMP_TL3
-global GRAPH_MOVIE_FIGNO TRUTH_FLAG RTR_FLAG
+global TRUTH_FLAG 
 
 global TRIP_COUNT
 TRIP_COUNT = 0;
@@ -102,15 +101,14 @@ if tstep>0,
 else
     ntstep = 1;
 end
-vpl = repmat(NaN,size(usrdata,1),ntstep);
+vpl = NaN(size(usrdata,1),ntstep);
 hpl = vpl;
-ncrit = vpl;
 
 los_in_bnd=ismember(usr2satdata(:,COL_U2S_UID), find(usrdata(:,COL_USR_INBND)));
-givei = repmat(NaN,size(igpdata,1),ntstep);
-udrei = repmat(NaN,size(satdata,1),ntstep);
-betai=  repmat(NaN,size(igpdata,1),ntstep);
-chi2ratioi=  repmat(NaN,size(igpdata,1),ntstep);
+givei = NaN(size(igpdata,1),ntstep);
+udrei = NaN(size(satdata,1),ntstep);
+betai=  NaN(size(igpdata,1),ntstep);
+chi2ratioi=  NaN(size(igpdata,1),ntstep);
 
 
 udre_hist=zeros(HIST_UDRE_NBINS+1,1);
@@ -123,7 +121,7 @@ sat_xyz=[];
 % find all los rise times for cnmp calculation, 
 % start from tstart-CNMP_TL3 (below this, cnmp is at floor value)
 if isempty(CNMP_TL3)
-    CNMP_TL3 = 12000;
+    CNMP_TL3 = 12000*2;
 end
 wrs2sat_trise = find_trise(tstart-CNMP_TL3,tend,MOPS_SIN_WRSMASK,alm_param,...
             wrsdata(:,COL_USR_XYZ),wrsdata(:,COL_USR_EHAT),...
@@ -131,7 +129,7 @@ wrs2sat_trise = find_trise(tstart-CNMP_TL3,tend,MOPS_SIN_WRSMASK,alm_param,...
 %add blank rows for geos
 nrise=size(wrs2sat_trise,2);
 wrs2sat_trise = reshape(wrs2sat_trise, ngps, nwrs, nrise);
-wrs2sat_trise(ngps+1:ngps+ngeo,:,:)=zeros(ngeo, nwrs, nrise);
+wrs2sat_trise(ngps+1:ngps+ngeo,:,:)=zeros(ngeo, nwrs, nrise) - 4*86400;
 wrs2sat_trise = reshape(wrs2sat_trise, nsat*nwrs, nrise);
 
 if TRUTH_FLAG
@@ -164,14 +162,7 @@ while tcurr<=tend,
         igpdata, wrs2satdata, gpsudrefun, geoudrefun, givefun, wrstrpfun,...
         wrsgpscnmpfun, wrsgeocnmpfun, outputs, tcurr, tstart, tstep,...
         wrs2sat_trise, inv_igp_mask, truth_data, dual_freq);
-    %if truthflag
-      %h=figure(GRAPH_MOVIE_FIGNO);
-      %iono_contour(igpdata(:,COL_IGP_LL), inv_igp_mask, ...
-      %             igpdata(:,COL_IGP_GIVEI), igpdata(:,COL_IGP_DELAY), ...
-      %             truth_data, [-130 -60 20 55]);
-      %set(h,'name','DELAY MAP');
-      %M(itstep)=getframe(h);
-      %end
+
     %store the GIVE indices
     givei(:,itstep) = igpdata(:,COL_IGP_GIVEI);
     
@@ -200,8 +191,8 @@ while tcurr<=tend,
                         usrcnmpfun,alm_param,tcurr,pa_mode,dual_freq);
     vpl(:,itstep) = vhpl(:,1);
     hpl(:,itstep) = vhpl(:,2);
-%    ncritv(:,itstep) = vhpl(:,3);
-%    ncrith(:,itstep) = vhpl(:,4);
+
+    
 	hist_idx=find(los_in_bnd & ...
 	              (-usr2satdata(:,COL_U2S_GENUB(3)) >= MOPS_SIN_USRMASK));
 	udre_hist(1:HIST_UDRE_NBINS) = udre_hist(1:HIST_UDRE_NBINS) + ...

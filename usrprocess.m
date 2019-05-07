@@ -1,8 +1,8 @@
 function [vhpl,sig2_flt,sig2_uive,usr2satdata] = usrprocess(satdata,usrdata,...
                             igpdata,inv_igp_mask,usr2satdata,usrtrpfun,...
-                            usrcnmpfun,alm_param,time,pa_mode,dual_freq)
+                            usrcnmpfun,~,time,pa_mode,dual_freq)
 %*************************************************************************
-%*     Copyright c 2007 The board of trustees of the Leland Stanford     *
+%*     Copyright c 2013 The board of trustees of the Leland Stanford     *
 %*                      Junior University. All rights reserved.          *
 %*     This script file may be distributed and used freely, provided     *
 %*     this copyright notice is always kept with it.                     *
@@ -14,15 +14,18 @@ function [vhpl,sig2_flt,sig2_uive,usr2satdata] = usrprocess(satdata,usrdata,...
 % User Processing
 
 %Modified Todd Walter June 28, 2007 to include PA vs. NPA mode
+%Modified by Todd Walter Sept. 4, 2013 to include MT27 & other constellations
 
-global MOPS_SIN_USRMASK 
+global MOPS_SIN_USRMASK MT27
 global COL_SAT_XYZ COL_USR_XYZ COL_USR_LL COL_SAT_UDREI ...
         COL_USR_EHAT COL_USR_NHAT COL_USR_UHAT  ...
         COL_U2S_PRN COL_U2S_GXYZB ...
         COL_U2S_LOSENU COL_U2S_GENUB COL_U2S_EL COL_U2S_AZ ...
         COL_U2S_IPPLL COL_U2S_TTRACK0 COL_U2S_INITNAN...
         COL_SAT_COV COL_SAT_SCALEF COL_IGP_LL COL_IGP_GIVEI
-global MOPS_SIG2_UDRE
+global MOPS_SIG2_UDRE MOPS_UDREI_NM MOPS_UDREI_DNU 
+global MOPS_MIN_GEOPRN MOPS_MAX_GEOPRN
+global MOPS_UIRE_NUM MOPS_UIRE_DEN MOPS_UIRE_CONST
 global CONST_F1 CONST_F5
 
 nsat = size(satdata,1);
@@ -63,14 +66,11 @@ if ~isempty(usrcnmpfun)
 end
 
 % initialize outputs
-sig2_flt = repmat(NaN,nlos,1);
-sig2_uive = repmat(NaN,nlos,1);
-vhpl = repmat(NaN,nusr,2);
+sig2_flt = NaN(nlos,1);
+sig2_uive = NaN(nlos,1);
+vhpl = NaN(nusr,2);
 
-% check for valid UDRE
-sig2_udre = MOPS_SIG2_UDRE(satdata(:,COL_SAT_UDREI))';
-
-[t1 t2]=meshgrid(1:nusr,1:nsat);
+[t1, t2]=meshgrid(1:nusr,1:nsat);
 usridx=reshape(t1,nlos,1);
 satidx=reshape(t2,nlos,1);
 los_xyzb = usr2satdata(:,COL_U2S_GXYZB);
@@ -82,16 +82,48 @@ ll_usr_ipp = usr2satdata(:,COL_U2S_IPPLL);
 el = usr2satdata(:,COL_U2S_EL);
 givei = igpdata(:,COL_IGP_GIVEI);
 
-good_udre = find(sig2_udre(satidx(abv_mask)) > 0);
+% check for valid UDRE
+if (pa_mode)
+    mops_sig2_udre = MOPS_SIG2_UDRE;
+    mops_sig2_udre(13:end) = NaN;
+    sig2_udre = mops_sig2_udre(satdata(:,COL_SAT_UDREI))';
+else
+    mops_sig2_udre = MOPS_SIG2_UDRE;
+    mops_sig2_udre([MOPS_UDREI_NM MOPS_UDREI_DNU]) = NaN;
+    sig2_udre = mops_sig2_udre(satdata(:,COL_SAT_UDREI))';
+end
+good_udre = find((sig2_udre(satidx(abv_mask)) > 0) | ...
+     ((usr2satdata(satidx(abv_mask),COL_U2S_PRN) >= MOPS_MIN_GEOPRN) & ...
+      (usr2satdata(satidx(abv_mask),COL_U2S_PRN) <= MOPS_MAX_GEOPRN)));
+  
 if(~isempty(good_udre))
     good_sat=abv_mask(good_udre);
-    sig2_flt(good_sat)=udre2flt(los_xyzb(good_sat,:), satidx(good_sat), ...
-                                sig2_udre, mt28_cov, mt28_sf);
+    
+    if MT27
+        %european MT27 message
+        sig2_flt(good_sat)=sig2_udre(satidx(good_sat));
+        mt27_poly = [[20 -40]; [70 -40]; [70 40]; [20 40]; [20 -40];];
+        inside = find(inpolygon(usrdata(usridx(good_sat),COL_USR_LL(1)),...
+                          usrdata(usridx(good_sat),COL_USR_LL(2)), mt27_poly(:,1),...
+                          mt27_poly(:,2)));     
+        sig2_flt(good_sat(inside)) = sig2_flt(good_sat(inside))*3;              
+        outside = find(~inpolygon(usrdata(usridx,COL_USR_LL(1)),...
+                          usrdata(usridx,COL_USR_LL(2)), mt27_poly(:,1),...
+                          mt27_poly(:,2)));
+        sig2_flt(outside) = sig2_flt(outside)*10000;
+    else
+        sig2_flt(good_sat)=udre2flt(los_xyzb(good_sat,:), ....
+                                    satidx(good_sat), ...
+                                    sig2_udre, mt28_cov, mt28_sf);
+    end
 
     if (dual_freq)
         %dual frequency user (iono-free combination)        
         good_los = good_sat;
-        sig2 = sig2_flt(good_los) + sig2_cnmp(good_sat)*...
+        %residual iono error (higher order terms) really sig_uire 
+        sig2_uive(good_sat) = (MOPS_UIRE_NUM*ones(size(good_sat))./...
+                   (MOPS_UIRE_DEN + el(good_los).^2) + MOPS_UIRE_CONST).^2;
+        sig2 = sig2_flt(good_los) + sig2_uive(good_sat) + sig2_cnmp(good_sat)*...
                (CONST_F1^4 + CONST_F5^4)/((CONST_F1^2 - CONST_F5^2)^2)...
                + sig2_trop(good_los);              
     else
@@ -107,16 +139,16 @@ if(~isempty(good_udre))
                0.064*180*cos((usr2satdata(good_sat,COL_U2S_IPPLL(2))/180-1.617)*pi);
            
             %mid-latitude klobuchar confidence
-            sig2_uive(good_sat) = 20.25*obliquity2(el(good_sat));
+            sig2_uive(good_sat) = 20.25;
             %low-latitude klobuchar confidence
             idx = find(abs(mag_lat) < 20);
             if(~isempty(idx))
-                sig2_uive(good_sat(idx)) = 81*obliquity2(el(good_sat(idx)));
+                sig2_uive(good_sat(idx)) = 81;
             end
             %high-latitude klobuchar confidence
             idx = find(abs(mag_lat) > 55);
             if(~isempty(idx))
-                sig2_uive(good_sat(idx)) = 36*obliquity2(el(good_sat(idx)));
+                sig2_uive(good_sat(idx)) = 36;
             end            
             good_los = good_sat;
         end

@@ -40,19 +40,29 @@ nusr = size(usrdata,1);
 nlos = nusr;
 usr2satdata = repmat(NaN,nlos,COL_U2S_MAX);
 
-usr2satdata(:,COL_U2S_GXYZB) = find_los_xyzb(usrdata(:,COL_USR_XYZ), sat_xyz);
+usr2satdata(:,COL_U2S_GXYZB) = find_los_xyzb(usrdata(:,COL_USR_XYZ), sat_xyz');
 usr2satdata(:,COL_U2S_GENUB) = find_los_enub(usr2satdata(:,COL_U2S_GXYZB),...
    usrdata(:,COL_USR_EHAT),usrdata(:,COL_USR_NHAT),usrdata(:,COL_USR_UHAT));
 abv_mask = find(-usr2satdata(:,COL_U2S_GENUB(3)) >= MOPS_SIN_USRMASK);
 
 n_abv=length(abv_mask);
 los_xyzb=usr2satdata(abv_mask,COL_U2S_GXYZB);
-for ipair=1:n_abv
-  usr2satdata(abv_mask(ipair),COL_U2S_SIG2TRP) = ...
-                                    los_xyzb(ipair,:)*Cov*los_xyzb(ipair,:)';
-end
 
-projection = sqrt(usr2satdata(:,COL_U2S_SIG2TRP));
+if size(Cov,1) == 4 && size(Cov,2) == 4 
+    for ipair=1:n_abv
+      usr2satdata(abv_mask(ipair),COL_U2S_SIG2TRP) = ...
+                                        los_xyzb(ipair,:)*Cov*los_xyzb(ipair,:)';
+    end
+    projection = sqrt(usr2satdata(:,COL_U2S_SIG2TRP));
+
+elseif size(Cov,1) == 4 && size(Cov,2) == 1
+    for ipair=1:n_abv
+      usr2satdata(abv_mask(ipair),COL_U2S_SIG2TRP) = ...
+                                        los_xyzb(ipair,:)*Cov;
+    end    
+    projection = usr2satdata(:,COL_U2S_SIG2TRP);
+    
+end
 
 figure
 clf;
@@ -60,9 +70,10 @@ min_mesh = min(min(projection(find(projection ~= 0))));
 max_mesh = max(max(projection));
 conLev = [min_mesh:(max_mesh-min_mesh)/100:max_mesh];
 contourf([lonmin:lonstep:lonmax],[latmin:latstep:latmax],...
-         reshape(projection,nlon,nlat)', conLev)
-shading flat
-colorbar
+         reshape(projection,nlon,nlat)', conLev, 'LineColor', 'none')
+colormap('jet')
+h = colorbar;
+h.Label.String = 'Projected Error (m)';
 hold on
 
 ax=axis;

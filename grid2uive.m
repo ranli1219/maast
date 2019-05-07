@@ -282,12 +282,57 @@ if(~isempty(idx))
   end
 end
 
+%perform interpolation for ipps above 85 lat
+idx=find((ll_ipp(:,1) > 85.0));
+if(~isempty(idx))
+  %calculate the weights
+  W(idx,1)=(1-xyIPP(idx,1)).*(1-xyIPP(idx,2));
+  W(idx,2)=xyIPP(idx,1).*(1-xyIPP(idx,2));
+  W(idx,3)=xyIPP(idx,1).*xyIPP(idx,2);
+  W(idx,4)=(1-xyIPP(idx,1)).*xyIPP(idx,2);
+
+  %are all 4 in the mask?
+  mask4=find(nBadIGPs(idx)==0);
+  if(~isempty(mask4))
+    %assign GIVEs
+    sig2_give(idx(mask4),1)=IGPsig2_give(IGPs(idx(mask4),1));
+    sig2_give(idx(mask4),2)=IGPsig2_give(IGPs(idx(mask4),2));
+    sig2_give(idx(mask4),3)=IGPsig2_give(IGPs(idx(mask4),3));
+    sig2_give(idx(mask4),4)=IGPsig2_give(IGPs(idx(mask4),4));
+
+    if calc_delay
+      grid_delay(idx(mask4),1)=igds(IGPs(idx(mask4),1));
+      grid_delay(idx(mask4),2)=igds(IGPs(idx(mask4),2));
+      grid_delay(idx(mask4),3)=igds(IGPs(idx(mask4),3));
+      grid_delay(idx(mask4),4)=igds(IGPs(idx(mask4),4));
+    end
+    %which IGPs are not activated
+    [badcorner badipp]=find(sig2_give(idx(mask4),:)'==MOPS_NOT_MONITORED);
+    if(~isempty(badipp))
+      %determine the number of bad GIVEs per IPP
+      bad_idx=[1 find(diff(badipp))'+1];
+      nBadgives(idx(mask4(badipp(bad_idx))))=diff([bad_idx length(badipp)+1]);
+    end      
+    %find the ones with all 4 points
+    act4=find(nBadgives(idx(mask4))==0);
+    if(~isempty(act4))
+      %perform 4 point interpolation
+      sig2_uive(idx(mask4(act4)))=sum((W(idx(mask4(act4)),:).*...
+                                   sig2_give(idx(mask4(act4)),:))')';
+      if calc_delay
+        user_delays(idx(mask4(act4)))=sum((W(idx(mask4(act4)),:).*...
+                                   grid_delays(idx(mask4(act4)),:))')';
+      end
+    end
+  end
+end
+
 if calc_delay
   varargout(1) = {user_delays};
 end
 %%%TODO Test interpolation in other parts of the world 
 %                                      (only North America Tested so far)
-%%%TODO add interpolation above 85 degrees and below -75 degrees
+%%%TODO add interpolation below -75 degrees
 
 
 

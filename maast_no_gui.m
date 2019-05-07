@@ -77,6 +77,7 @@ GUI_OUT_COVAVAIL = 7;
     %choose Release 8/9 ADD version
     geoudrefun = 'af_geoadd2';
     init_geo2_osp;
+    init_geo_cnmp;
     
     %choose constant version
     % UDREI values to choose are from the MOPS
@@ -120,22 +121,22 @@ GUI_OUT_COVAVAIL = 7;
 % IGP Mask Menu
 
     %select IOC IGP mask    
-%    igpfile = 'igpjoint.dat';
+%    igpfile = 'igpjoint.txt';
     
     %select Release 6/7 mask
-%    igpfile = 'igpjoint_R6_7.dat';
+%    igpfile = 'igpjoint_R6_7.txt';
     
     %select Release 8/9 mask
-    igpfile = 'igpjoint_R8_9.dat';
+    igpfile = 'igpjoint_R8_9.txt';
     
     %select EGNOS mask
-%    igpfile = 'igpegnos.dat';
+%    igpfile = 'igpegnos.txt';
     
     %select MSAS mask
-%    igpfile = 'igpmsas.dat';
+%    igpfile = 'igpmsas.txt';
     
     %select Brazil mask
-%    igpfile =  'igpbrazil.dat';
+%    igpfile =  'igpbrazil.txt';
  
 % WRS GPS CNMP Menu
 
@@ -167,57 +168,57 @@ GUI_OUT_COVAVAIL = 7;
 % WRS Menu
 
       %select IOC WRS network
-%      wrsfile = 'wrs25.dat';
+%      wrsfile = 'wrs25.txt';
       
       %select Release 6/7 WRS network      
-%      wrsfile = 'wrs_R6_7.dat';
+%      wrsfile = 'wrs_R6_7.txt';
       
       %select Release 8/9 WRS network      
-      wrsfile = 'wrs_foc.dat';
+      wrsfile = 'wrs_foc.txt';
       
       %select EGNOS RIMS network      
-%      wrsfile = 'egnos_rims.dat';
+%      wrsfile = 'egnos_rims.txt';
       
       %select MSAS RS network      
-%      wrsfile = 'rs_msas.dat';
+%      wrsfile = 'rs_msas.txt';
       
       %select Brazil WRS network      
-%      wrsfile = 'brazil_wrs.dat';
+%      wrsfile = 'brazil_wrs.txt';
       
       %select a worldwide 16 WRS network      
-%      wrsfile = 'wrs_world16.dat';
+%      wrsfile = 'wrs_world16.txt';
       
       %select a worldwide 30 WRS network      
-%      wrsfile = 'wrs_world30.dat';
+%      wrsfile = 'wrs_world30.txt';
         
 % USER Menu
 
       %select CONUS as the user area
-%      usrpolyfile = 'usrconus.dat';
+%      usrpolyfile = 'usrconus.txt';
       
       %select Alaska as the user area
-%      usrpolyfile = 'usralaska.dat';
+%      usrpolyfile = 'usralaska.txt';
       
       %select Canada as the user area
-%      usrpolyfile = 'usrcanada.dat';
+%      usrpolyfile = 'usrcanada.txt';
       
       %select Mexico as the user area
-%      usrpolyfile = 'usrmexico.dat';
+%      usrpolyfile = 'usrmexico.txt';
       
       %select North America as the user area
-      usrpolyfile = 'usrn_america.dat';
+      usrpolyfile = 'usrn_america.txt';
       
       %select Europe as the user area
-%      usrpolyfile = 'usreurope.dat';
+%      usrpolyfile = 'usreurope.txt';
       
       %select Japan as the user area
-%      usrpolyfile = 'usrmsas.dat';
+%      usrpolyfile = 'usrmsas.txt';
       
       %select Brazil as the user area
-%      usrpolyfile = 'usrbrazil.dat';
+%      usrpolyfile = 'usrbrazil.txt';
       
       %select the world as the user area
-%      usrpolyfile = 'usrworld.dat';
+%      usrpolyfile = 'usrworld.txt';
         
       % select user latitude and longitude grid steps in degrees
       usrlatstep = 2;
@@ -226,18 +227,18 @@ GUI_OUT_COVAVAIL = 7;
 % SV Menu
 
       %activate GPS constellation
-      svfile = 'almmops.dat'; 
+      svfile = 'almmops.txt'; 
 %      svfile = 'current.alm'; 
       %Use Yuma file instead
-%      svfile = ['almyuma#.dat'];
+%      svfile = ['almyuma#.txt'];
 %      svfile = ['SV24Week7031.alm'];
 
       %activate Galileo constellation
-%      svfile =  'almgalileo.dat';
+%      svfile =  'almgalileo.txt';
       
       %activate both
-%      svfile = {'almmops.dat', 'almgalileo.dat'};
-%      svfile = {'almyuma#.dat', 'almgalileo.dat'};
+%      svfile = {'almmops.txt', 'almgalileo.txt'};
+%      svfile = {'almyuma#.txt', 'almgalileo.txt'};
 
         % check if file(s) exist
         i=1;

@@ -1,6 +1,6 @@
 function alm_param=read_yuma(filename)
 %*************************************************************************
-%*     Copyright c 2001 The board of trustees of the Leland Stanford     *
+%*     Copyright c 2013 The board of trustees of the Leland Stanford     *
 %*                      Junior University. All rights reserved.          *
 %*     This script file may be distributed and used freely, provided     *
 %*     this copyright notice is always kept with it.                     *
@@ -20,10 +20,9 @@ function alm_param=read_yuma(filename)
 % see also ALM2XYZ
 
 %based on code by Jon Nichols
-%last modification June 12, 2003 Todd Walter
+%last modification March 12, 2013 Todd Walter
 
 alm_param=zeros(64,11);
-max_prn=0;
 
 if nargin < 1
   error('you must specify a filename or week number')
@@ -51,60 +50,59 @@ while i<=size(filename,2)
 
     %get prn number
     str = fgets(fid);
-    prn = max_prn + str2num(str(28:end));
+    prn = str2double(str(28:end));
     alm_param(prn,1) = prn;
     fgets(fid);
 
     %get eccentricity
     str = fgets(fid);
-    alm_param(prn,2) = str2num(str(28:end));
+    alm_param(prn,2) = str2double(str(28:end));
 
     %get time of applicability
     str = fgets(fid);
-    alm_param(prn,3) = str2num(str(28:end));
+    alm_param(prn,3) = str2double(str(28:end));
 
     %get inclination angle
     str = fgets(fid);
-    alm_param(prn,4) = str2num(str(28:end));
+    alm_param(prn,4) = str2double(str(28:end));
 
     %get rate of right ascention
     str = fgets(fid);
-    alm_param(prn,5) = str2num(str(28:end));
+    alm_param(prn,5) = str2double(str(28:end));
 
     %get square root of semi-major axis
     str = fgets(fid); 
-    alm_param(prn,6) = str2num(str(28:end));
+    alm_param(prn,6) = str2double(str(28:end));
 
     %get right ascention
     str = fgets(fid); 
-    alm_param(prn,7) = str2num(str(28:end));
+    alm_param(prn,7) = str2double(str(28:end));
 
     %get argument of perigee
     str = fgets(fid); 
-    alm_param(prn,8) = str2num(str(28:end));
+    alm_param(prn,8) = str2double(str(28:end));
 
     %get mean anomaly
     str = fgets(fid); 
-    alm_param(prn,9) = str2num(str(28:end));
+    alm_param(prn,9) = str2double(str(28:end));
 
     %get Af0
     str = fgets(fid); 
-    alm_param(prn,10) = str2num(str(28:end));
+    alm_param(prn,10) = str2double(str(28:end));
 
     %get Af1
     str = fgets(fid); 
-    alm_param(prn,11) = str2num(str(28:end));
+    alm_param(prn,11) = str2double(str(28:end));
 
     %get week number
     str = fgets(fid); 
-    %alm_param(prn,3) = alm_param(prn,3) + 604800.0*str2num(str(28:end));
+    %alm_param(prn,3) = alm_param(prn,3) + 604800.0*str2double(str(28:end));
     fgets(fid);
 
   end;
 
   fclose(fid);
   i = i+1;
-  max_prn=max(alm_param(:,1));
 end
 
 %save only nonzero rows
