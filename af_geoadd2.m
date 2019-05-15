@@ -47,7 +47,9 @@ if(dual_freq)
                        GEO2_SIG2_WRECLK + GEO2_SIG2_WREL1L2; 
     %temporary  assign L2 values to be equal to L1 values
     %beacause COL_U2S_SIG2L2MP location is used to  store sigma_UIVE_UPM
-    wrs2satdata(:,COL_U2S_SIG2L2MP) = wrs2satdata(:,COL_U2S_SIG2L1MP);                   
+    wrs2satdata(:,COL_U2S_SIG2L2MP) = wrs2satdata(:,COL_U2S_SIG2L1MP);  
+    F2 = zeros(size((wrs2satdata(:,COL_U2S_EL))));
+    
 else
     F2 = obliquity2(wrs2satdata(:,COL_U2S_EL));
     %interpolated UPM_UIVE stored in COL_U2S_SIG2L2MP
@@ -83,6 +85,7 @@ for isat = 1:nsat
         sig2_udre_cp = (4.5/3.29).^2;
         
         idx_good_give = find(wrs2satdata(idxvis,COL_U2S_IVPP) > 0);
+
         min_uire2_sp = min([min(F2(idxvis(idx_good_give)).* ...
                       wrs2satdata(idxvis(idx_good_give),COL_U2S_IVPP)) ...
                             GEO2_CEIL_EFF_GIVE]);
