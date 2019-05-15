@@ -249,7 +249,7 @@ GUI_OUT_COVAVAIL = 7;
             fid=fopen(svfile);
             i = size(svfile,2);
           end
-          if fid==-1,
+          if fid==-1
               fprintf('Almanac file not found.  Please try again.\n');
               return;
           else
@@ -265,24 +265,29 @@ GUI_OUT_COVAVAIL = 7;
       TEnd = 86400;
       
       % Size of time step
-      TStep = 300;
+      TStep = 3000;
 
 % GEO Position Menu
 
       %geodata = [];
 % PRN   Lat.  MT28 parameters                 scale_exp Default Name
 %120   -15.5    1    0  0   0   1    0  0   1  0  0   5    0   %AOR-E
-%122   -54.0  144 -133 11  43 146 -100 69 268 27 16   1    0   %AOR-W
 %124    21.5    1    0  0   0   1    0  0   1  0  0   5    0   %ARTEMIS
 %131    64.0    1    0  0   0   1    0  0   1  0  0   5    0   %IOR
-%134   178.0  177  -24 21 181  84   -2 -7 152 15  8   2    0   %POR
-%137  -107.0  157  484 48 510  63  -11 58  38  4  1   5    1   %CRE
-%138  -133.0  317  312 41 446  41  -59 22  28  3  1   5    1   %CRW
 %135   135.0    1    0  0   0   1    0  0   1  0  0   5    0   %MTSAT-1
 %136   140.0    1    0  0   0   1    0  0   1  0  0   5    0   %MTSAT-2
   
-      geodata = [[137  -107.0  157  484 48 510  63  -11 58  38  4  1   5    1];...
-                 [138  -133.0  317  312 41 446  41  -59 22  28  3  1   5    1];];
+% WAAS GEOs
+%122   -54.0  144 -133 11  43 146 -100 69 268 27 16   1    0   %AOR-W      Active before 2003 through July 2007
+%134   178.0  177  -24 21 181  84   -2 -7 152 15  8   2    0   %POR        Active before 2003 through July 2007
+%135  -133.0  317  312 41 446  41  -59 22  28  3  1   5    1   %CRW        Active November 2006 
+%138  -107.3  157  484 48 510  63  -11 58  38  4  1   5    1   %CRW        Active July 2007
+%133   -98.0   57  458 44 461  35  -15 34   2  0  4   3    0   %AMR        Active Nov. 2010 through Nov. 2017 
+%131  -117.0  213  401 37 455  51  -28 42  30  3  1   5    1   %SM9 - GEO5 Active March 2018
+%133  -129.0  302  356 30 466  42  -42 27  30  3  1   5    1   %S15 - GEO6
+
+      geodata = [[138  -107.0  157  484 48 510  63  -11 58  38  4  1   5    1];...
+                 [135  -133.0  317  312 41 446  41  -59 22  28  3  1   5    1];];
 
 % Mode / Alert limit
 
