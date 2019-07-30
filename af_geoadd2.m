@@ -49,8 +49,10 @@ if(dual_freq)
     %beacause COL_U2S_SIG2L2MP location is used to  store sigma_UIVE_UPM
     wrs2satdata(:,COL_U2S_SIG2L2MP) = wrs2satdata(:,COL_U2S_SIG2L1MP);  
     F2 = zeros(size((wrs2satdata(:,COL_U2S_EL))));
+    effective_give_ceiling = 0;
     
 else
+    effective_give_ceiling = GEO2_CEIL_EFF_GIVE;
     F2 = obliquity2(wrs2satdata(:,COL_U2S_EL));
     %interpolated UPM_UIVE stored in COL_U2S_SIG2L2MP
     sig2_mon = sig2_trop + wrs2satdata(:,COL_U2S_SIG2L1MP) +...
@@ -88,7 +90,7 @@ for isat = 1:nsat
 
         min_uire2_sp = min([min(F2(idxvis(idx_good_give)).* ...
                       wrs2satdata(idxvis(idx_good_give),COL_U2S_IVPP)) ...
-                            GEO2_CEIL_EFF_GIVE]);
+                            effective_give_ceiling]);
         
         % Calculate covariance matrix and psi_max
         G = -wrs2satdata(idxvis,COL_U2S_GXYZB);

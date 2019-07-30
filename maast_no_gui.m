@@ -99,8 +99,14 @@ GUI_OUT_COVAVAIL = 7;
 %    init_giveadd1_osp;    
     
     %choose Release 8/9 version
-    givefun = 'af_giveadd2';
-    init_giveadd2_osp;      
+%     givefun = 'af_giveadd2';
+%     init_giveadd2_osp;      
+    
+    %choose Kriging version
+    givefun = 'af_givekriging';
+%     init_givekriging_osp;      
+%     init_givekriging_msd_osp
+    init_givekriging_cy18_osp
     
     %choose constant version
     % GIVEI values to choose are from the MOPS
@@ -262,10 +268,11 @@ GUI_OUT_COVAVAIL = 7;
       TStart = 0;
       
       %End time for simulation
-      TEnd = 86400;
+%       TEnd = 86400;
+      TEnd = 86164.1;
       
       % Size of time step
-      TStep = 3000;
+      TStep = 288;
 
 % GEO Position Menu
 
@@ -281,7 +288,7 @@ GUI_OUT_COVAVAIL = 7;
 %122   -54.0  144 -133 11  43 146 -100 69 268 27 16   1    0   %AOR-W      Active before 2003 through July 2007
 %134   178.0  177  -24 21 181  84   -2 -7 152 15  8   2    0   %POR        Active before 2003 through July 2007
 %135  -133.0  317  312 41 446  41  -59 22  28  3  1   5    1   %CRW        Active November 2006 
-%138  -107.3  157  484 48 510  63  -11 58  38  4  1   5    1   %CRW        Active July 2007
+%138  -107.3  157  484 48 510  63  -11 58  38  4  1   5    1   %CRE        Active July 2007
 %133   -98.0   57  458 44 461  35  -15 34   2  0  4   3    0   %AMR        Active Nov. 2010 through Nov. 2017 
 %131  -117.0  213  401 37 455  51  -28 42  30  3  1   5    1   %SM9 - GEO5 Active March 2018
 %133  -129.0  302  356 30 466  42  -42 27  30  3  1   5    1   %S15 - GEO6
